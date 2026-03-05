@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Heart, Calendar, MapPin, Camera, Music } from 'lucide-react';
+import { Heart, Calendar, MapPin, Camera, Music, Timer } from 'lucide-react';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 const WEDDING_SECTIONS = [
   {
@@ -45,6 +46,17 @@ const WEDDING_SECTIONS = [
     image: "https://picsum.photos/seed/wedding4/1200/1600",
     icon: <Music className="w-6 h-6 text-stone-200" />,
   },
+  {
+    id: 5,
+    type: 'countdown',
+    title: "Our First Anniversary",
+    subtitle: "Counting down the days",
+    description: "We are eagerly waiting to celebrate our first year of marriage. Every day has been a new chapter in our beautiful story.",
+    color: "bg-[#4a4a30]",
+    textColor: "text-stone-100",
+    image: "https://picsum.photos/seed/anniversary/1200/1600",
+    icon: <Timer className="w-6 h-6 text-rose-300" />,
+  }
 ];
 
 function Sparkles({ className }: { className?: string }) {
@@ -64,6 +76,53 @@ function Sparkles({ className }: { className?: string }) {
       <path d="m5 21 1-1" />
       <path d="m19 21-1-1" />
     </svg>
+  );
+}
+
+function CountdownTimer() {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
+
+  useEffect(() => {
+    const targetDate = new Date('2026-06-15T00:00:00').getTime();
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const difference = targetDate - now;
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((difference % (1000 * 60)) / 1000)
+        });
+      } else {
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="grid grid-cols-4 gap-4 mt-8">
+      {[
+        { label: 'Days', value: timeLeft.days },
+        { label: 'Hours', value: timeLeft.hours },
+        { label: 'Mins', value: timeLeft.minutes },
+        { label: 'Secs', value: timeLeft.seconds },
+      ].map((item) => (
+        <div key={item.label} className="flex flex-col items-center">
+          <span className="text-3xl md:text-5xl font-serif font-light">{item.value}</span>
+          <span className="text-[10px] uppercase tracking-widest font-sans opacity-60 mt-2">{item.label}</span>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -119,7 +178,7 @@ export default function Home() {
       <div className="relative">
         {WEDDING_SECTIONS.map((section, index) => (
           <section
-            key={section.id}
+            key={section.id || section.title}
             className={`sticky top-0 h-screen w-full flex items-center justify-center p-4 md:p-12 ${section.color} ${section.textColor} shadow-[0_-20px_50px_rgba(0,0,0,0.05)]`}
             style={{ 
               zIndex: index + 1,
@@ -148,21 +207,25 @@ export default function Home() {
                   {section.description}
                 </p>
                 
-                <div className="mt-12 flex items-center gap-6">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-tighter font-sans opacity-40">Location</span>
-                    <span className="text-sm font-sans flex items-center gap-1">
-                      <MapPin className="w-3 h-3" /> Tuscany, Italy
-                    </span>
+                {section.type === 'countdown' ? (
+                  <CountdownTimer />
+                ) : (
+                  <div className="mt-12 flex items-center gap-6">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase tracking-tighter font-sans opacity-40">Location</span>
+                      <span className="text-sm font-sans flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> Tuscany, Italy
+                      </span>
+                    </div>
+                    <div className="w-px h-8 bg-stone-300/30" />
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase tracking-tighter font-sans opacity-40">Photographer</span>
+                      <span className="text-sm font-sans flex items-center gap-1">
+                        <Camera className="w-3 h-3" /> Elena Rossi
+                      </span>
+                    </div>
                   </div>
-                  <div className="w-px h-8 bg-stone-300/30" />
-                  <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-tighter font-sans opacity-40">Photographer</span>
-                    <span className="text-sm font-sans flex items-center gap-1">
-                      <Camera className="w-3 h-3" /> Elena Rossi
-                    </span>
-                  </div>
-                </div>
+                )}
               </motion.div>
               
               <motion.div
@@ -173,7 +236,7 @@ export default function Home() {
                 className="order-1 md:order-2 relative aspect-[3/4] md:aspect-auto md:h-[70vh] rounded-2xl overflow-hidden shadow-2xl border-[12px] border-white"
               >
                 <Image 
-                  src={section.image} 
+                  src={section.image || ''} 
                   alt={section.title} 
                   fill 
                   className="object-cover"
