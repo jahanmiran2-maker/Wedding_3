@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Cormorant_Garamond } from 'next/font/google';
 import './globals.css'; // Global styles
 
 const inter = Inter({
@@ -7,15 +7,21 @@ const inter = Inter({
   variable: '--font-sans',
 });
 
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-serif',
+});
+
 export const metadata: Metadata = {
-  title: 'Sticky Stack - Overlapping Scroll Effect',
-  description: 'A modern landing page demonstration of the overlapping scroll effect.',
+  title: 'Eternal Love - Our Wedding Album',
+  description: 'A beautiful, interactive wedding album.',
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body suppressHydrationWarning className="font-sans">{children}</body>
+    <html lang="en" className={`${inter.variable} ${cormorant.variable}`}>
+      <body suppressHydrationWarning className="font-serif">{children}</body>
     </html>
   );
 }
